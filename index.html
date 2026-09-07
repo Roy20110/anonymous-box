@@ -1,0 +1,2185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>匿名提问箱</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-light: #eef2ff;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --danger: #ef4444;
+            --success: #10b981;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --shadow-lg: 0 12px 40px rgba(0,0,0,0.1);
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+        a { color: inherit; text-decoration: none; }
+        button { font-family: inherit; cursor: pointer; border: none; background: none; }
+        input, textarea { font-family: inherit; outline: none; }
+
+        /* 页面容器 */
+        .page { display: none; min-height: 100vh; }
+        .page.active { display: block; }
+
+        /* ========== 登录注册页 ========== */
+        .auth-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .auth-page::before {
+            content: '';
+            position: absolute;
+            width: 400px; height: 400px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
+            top: -150px; right: -100px;
+        }
+        .auth-page::after {
+            content: '';
+            position: absolute;
+            width: 300px; height: 300px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 50%;
+            bottom: -100px; left: -80px;
+        }
+        .auth-card {
+            background: rgba(255,255,255,0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px 32px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 1;
+            animation: authIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes authIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .auth-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .auth-logo {
+            width: 56px; height: 56px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            box-shadow: 0 8px 24px rgba(99,102,241,0.35);
+        }
+        .auth-logo svg { width: 28px; height: 28px; stroke: white; fill: none; stroke-width: 2; }
+        .auth-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+        .auth-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .auth-tabs {
+            display: flex;
+            background: var(--border-light);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 24px;
+        }
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+        .auth-tab.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+        .form-group { margin-bottom: 18px; }
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            color: var(--text);
+            background: var(--card);
+            transition: all 0.25s;
+        }
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-light);
+        }
+        .form-input::placeholder { color: var(--text-muted); }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            box-shadow: 0 6px 20px rgba(99,102,241,0.35);
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(99,102,241,0.45); }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-secondary {
+            background: var(--border-light);
+            color: var(--text);
+        }
+        .btn-secondary:hover { background: var(--border); }
+        .btn-danger {
+            background: #fef2f2;
+            color: var(--danger);
+        }
+        .btn-danger:hover { background: #fee2e2; }
+        .auth-footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .auth-footer a {
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* ========== 通用顶部导航 ========== */
+        .topbar {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px);
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .topbar-title {
+            font-size: 17px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .topbar-actions { display: flex; gap: 8px; }
+        .icon-btn {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-secondary);
+        }
+        .icon-btn:hover { background: var(--border-light); color: var(--text); }
+        .icon-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+        /* ========== 个人提问箱页（公开） ========== */
+        .box-page {
+            min-height: 100vh;
+            background: var(--bg);
+        }
+        .box-hero {
+            position: relative;
+            height: 280px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: flex-end;
+            padding: 0 24px 32px;
+        }
+        .box-hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.4));
+        }
+        .box-hero-content {
+            position: relative;
+            z-index: 1;
+            color: white;
+            display: flex;
+            align-items: flex-end;
+            gap: 16px;
+            width: 100%;
+        }
+        .box-avatar {
+            width: 72px; height: 72px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .box-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .box-info { flex: 1; min-width: 0; }
+        .box-name {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .box-bio {
+            font-size: 13px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        .box-stats {
+            display: flex;
+            gap: 24px;
+            padding: 20px 24px;
+            background: var(--card);
+            border-bottom: 1px solid var(--border-light);
+        }
+        .box-stat { text-align: center; flex: 1; }
+        .box-stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .box-stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+        .box-ask-section {
+            padding: 24px;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ask-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+        }
+        .ask-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            color: var(--text);
+            resize: vertical;
+            transition: all 0.25s;
+            line-height: 1.6;
+        }
+        .ask-textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-light);
+        }
+        .ask-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+        }
+        .ask-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .ask-submit {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.25s;
+        }
+        .ask-submit:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(99,102,241,0.35); }
+        .ask-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* 留言列表 */
+        .messages-section {
+            padding: 0 24px 40px;
+        }
+        .message-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 18px;
+            margin-bottom: 14px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            animation: messageIn 0.4s ease both;
+        }
+        @keyframes messageIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .message-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .message-author {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .message-author-avatar {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--primary);
+        }
+        .message-time {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .message-content {
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text);
+            margin-bottom: 12px;
+            word-break: break-word;
+        }
+        .message-reply {
+            background: var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            margin-top: 10px;
+        }
+        .message-reply-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .message-reply-content {
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text);
+            word-break: break-word;
+        }
+        .message-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-light);
+        }
+        .message-action {
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: color 0.2s;
+        }
+        .message-action:hover { color: var(--primary); }
+        .message-action.danger:hover { color: var(--danger); }
+        .message-action svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+        .empty-state-icon {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            background: var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 28px;
+        }
+        .empty-state-text {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* ========== 后台页 ========== */
+        .dashboard-page {
+            min-height: 100vh;
+            background: var(--bg);
+            padding-bottom: 80px;
+        }
+        .dashboard-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 24px;
+            color: white;
+        }
+        .dashboard-welcome {
+            font-size: 13px;
+            opacity: 0.85;
+            margin-bottom: 4px;
+        }
+        .dashboard-name {
+            font-size: 22px;
+            font-weight: 700;
+        }
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 0 20px;
+            margin-top: -28px;
+            position: relative;
+            z-index: 1;
+        }
+        .dashboard-stat-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 16px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+        .dashboard-stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .dashboard-stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        .dashboard-actions {
+            padding: 24px 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .dashboard-action-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.25s;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .dashboard-action-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        .dashboard-action-icon {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .dashboard-action-icon svg { width: 22px; height: 22px; stroke: white; fill: none; stroke-width: 2; }
+        .dashboard-action-text { flex: 1; min-width: 0; }
+        .dashboard-action-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+        .dashboard-action-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .dashboard-messages {
+            padding: 0 20px 40px;
+        }
+        .message-reply-input {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            resize: vertical;
+            min-height: 70px;
+            margin-top: 10px;
+            transition: all 0.25s;
+        }
+        .message-reply-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-light);
+        }
+        .message-reply-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .btn-sm {
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        /* ========== 设置页 ========== */
+        .settings-page {
+            min-height: 100vh;
+            background: var(--bg);
+            padding-bottom: 40px;
+        }
+        .settings-section {
+            background: var(--card);
+            margin: 16px 20px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+        }
+        .settings-section-title {
+            padding: 16px 20px 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .settings-item {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border-top: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .settings-item:hover { background: var(--border-light); }
+        .settings-item-icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .settings-item-icon svg { width: 18px; height: 18px; stroke: white; fill: none; stroke-width: 2; }
+        .settings-item-content { flex: 1; min-width: 0; }
+        .settings-item-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+        }
+        .settings-item-value {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .settings-item-arrow {
+            color: var(--text-muted);
+            font-size: 18px;
+        }
+
+        /* 头像/背景预览 */
+        .settings-preview {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .settings-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .settings-bg-preview {
+            width: 56px; height: 56px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
+
+        /* 开关 */
+        .switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+            flex-shrink: 0;
+        }
+        .switch.active { background: var(--primary); }
+        .switch::after {
+            content: '';
+            position: absolute;
+            width: 20px; height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 2px; left: 2px;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+        .switch.active::after { transform: translateX(20px); }
+
+        /* ========== 底部导航 ========== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0; right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            padding: 8px 0 12px;
+            border-top: 1px solid var(--border-light);
+            z-index: 100;
+        }
+        .bottom-nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 6px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+        .bottom-nav-item.active { color: var(--primary); }
+        .bottom-nav-item svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; margin-bottom: 3px; }
+        .bottom-nav-item span { font-size: 11px; font-weight: 500; }
+
+        /* ========== 弹窗 ========== */
+        .modal-mask {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .modal-mask.show { display: flex; }
+        .modal {
+            background: var(--card);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-header {
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-title {
+            font-size: 17px;
+            font-weight: 700;
+        }
+        .modal-close {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            font-size: 20px;
+        }
+        .modal-close:hover { background: var(--border-light); }
+        .modal-body { padding: 20px 24px; }
+        .modal-footer {
+            padding: 16px 24px 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        /* 分享弹窗 */
+        .share-link-box {
+            background: var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .share-link-text {
+            flex: 1;
+            font-size: 13px;
+            color: var(--text-secondary);
+            word-break: break-all;
+            line-height: 1.5;
+        }
+        .share-copy-btn {
+            padding: 8px 16px;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .share-copy-btn:hover { background: var(--primary-hover); }
+        .share-methods {
+            display: flex;
+            justify-content: space-around;
+        }
+        .share-method {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .share-method:hover { transform: scale(1.08); }
+        .share-method-icon {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            font-size: 22px;
+            color: white;
+        }
+        .share-method-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.85);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 2000;
+            display: none;
+            animation: toastIn 0.25s ease;
+            max-width: 80%;
+            text-align: center;
+        }
+        .toast.show { display: block; }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translate(-50%, -45%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+
+        /* 加载 */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+        .spinner {
+            width: 32px; height: 32px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* 管理员页 */
+        .admin-users-list {
+            padding: 0 20px 40px;
+        }
+        .admin-user-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+        }
+        .admin-user-avatar {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .admin-user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .admin-user-info { flex: 1; min-width: 0; }
+        .admin-user-name {
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .admin-badge {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .admin-user-email {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+        .admin-user-stats {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .admin-user-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        /* 图片上传区域 */
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s;
+            margin-bottom: 16px;
+        }
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+        .upload-area-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        .upload-area-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        .upload-area-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .upload-preview {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+            margin-bottom: 12px;
+        }
+
+        /* 响应式 */
+        @media (min-width: 768px) {
+            .box-hero { height: 320px; padding: 0 40px 40px; }
+            .box-ask-section, .messages-section { max-width: 640px; margin: 0 auto; }
+            .dashboard-stats { max-width: 640px; margin-left: auto; margin-right: auto; margin-top: -28px; }
+            .dashboard-actions { max-width: 640px; margin-left: auto; margin-right: auto; }
+            .dashboard-messages { max-width: 640px; margin: 0 auto; }
+            .settings-section { max-width: 640px; margin-left: auto; margin-right: auto; }
+            .admin-users-list { max-width: 640px; margin: 0 auto; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ========== 登录注册页 ========== -->
+    <div class="page auth-page active" id="page-auth">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <div class="auth-title">匿名提问箱</div>
+                <div class="auth-subtitle">创建属于你的匿名提问空间</div>
+            </div>
+
+            <div class="auth-tabs">
+                <div class="auth-tab active" data-tab="login" onclick="switchAuthTab('login')">登录</div>
+                <div class="auth-tab" data-tab="register" onclick="switchAuthTab('register')">注册</div>
+            </div>
+
+            <!-- 登录表单 -->
+            <div id="loginForm">
+                <div class="form-group">
+                    <label class="form-label">邮箱 / 手机号</label>
+                    <input type="text" class="form-input" id="loginAccount" placeholder="请输入邮箱或手机号" onkeypress="if(event.key==='Enter')doLogin()">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">密码</label>
+                    <input type="password" class="form-input" id="loginPassword" placeholder="请输入密码" onkeypress="if(event.key==='Enter')doLogin()">
+                </div>
+                <button class="btn btn-primary" onclick="doLogin()">登 录</button>
+                <div class="auth-footer">
+                    还没有账号？<a onclick="switchAuthTab('register')">立即注册</a>
+                </div>
+            </div>
+
+            <!-- 注册表单 -->
+            <div id="registerForm" style="display:none;">
+                <div class="form-group">
+                    <label class="form-label">昵称</label>
+                    <input type="text" class="form-input" id="regNickname" placeholder="给自己起个名字">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">邮箱 / 手机号</label>
+                    <input type="text" class="form-input" id="regAccount" placeholder="用于登录的邮箱或手机号">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">密码</label>
+                    <input type="password" class="form-input" id="regPassword" placeholder="至少6位密码">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">确认密码</label>
+                    <input type="password" class="form-input" id="regPassword2" placeholder="再次输入密码" onkeypress="if(event.key==='Enter')doRegister()">
+                </div>
+                <button class="btn btn-primary" onclick="doRegister()">注 册</button>
+                <div class="auth-footer">
+                    已有账号？<a onclick="switchAuthTab('login')">去登录</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 个人提问箱页（公开） ========== -->
+    <div class="page box-page" id="page-box">
+        <div class="topbar">
+            <div class="topbar-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                匿名提问箱
+            </div>
+            <div class="topbar-actions">
+                <div class="icon-btn" onclick="showShareModal()" title="分享">
+                    <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="box-hero" id="boxHero">
+            <div class="box-hero-content">
+                <div class="box-avatar" id="boxAvatar">👤</div>
+                <div class="box-info">
+                    <div class="box-name" id="boxName">加载中...</div>
+                    <div class="box-bio" id="boxBio">欢迎来到我的匿名提问箱</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="box-stats">
+            <div class="box-stat">
+                <div class="box-stat-value" id="statTotal">0</div>
+                <div class="box-stat-label">总提问</div>
+            </div>
+            <div class="box-stat">
+                <div class="box-stat-value" id="statReplied">0</div>
+                <div class="box-stat-label">已回复</div>
+            </div>
+            <div class="box-stat">
+                <div class="box-stat-value" id="statPublic">0</div>
+                <div class="box-stat-label">公开</div>
+            </div>
+        </div>
+
+        <div class="box-ask-section" id="askSection">
+            <div class="section-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                向我提问
+            </div>
+            <div class="ask-card">
+                <textarea class="ask-textarea" id="askInput" placeholder="写下你想问的问题，完全匿名，我会认真回复..." maxlength="500"></textarea>
+                <div class="ask-footer">
+                    <span class="ask-hint">你的身份将完全匿名</span>
+                    <button class="ask-submit" id="askSubmit" onclick="submitMessage()">发送</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="messages-section">
+            <div class="section-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                公开问答
+            </div>
+            <div id="publicMessages">
+                <div class="loading"><div class="spinner"></div>加载中...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 后台页 ========== -->
+    <div class="page dashboard-page" id="page-dashboard">
+        <div class="dashboard-header">
+            <div class="dashboard-welcome">欢迎回来</div>
+            <div class="dashboard-name" id="dashName">用户</div>
+        </div>
+
+        <div class="dashboard-stats">
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-value" id="dashTotal">0</div>
+                <div class="dashboard-stat-label">总提问</div>
+            </div>
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-value" id="dashUnreplied">0</div>
+                <div class="dashboard-stat-label">待回复</div>
+            </div>
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-value" id="dashReplied">0</div>
+                <div class="dashboard-stat-label">已回复</div>
+            </div>
+        </div>
+
+        <div class="dashboard-actions">
+            <div class="dashboard-action-card" onclick="showShareModal()">
+                <div class="dashboard-action-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                    <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                </div>
+                <div class="dashboard-action-text">
+                    <div class="dashboard-action-title">分享提问箱</div>
+                    <div class="dashboard-action-desc">复制链接发给朋友</div>
+                </div>
+            </div>
+            <div class="dashboard-action-card" onclick="navigate('settings')">
+                <div class="dashboard-action-icon" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </div>
+                <div class="dashboard-action-text">
+                    <div class="dashboard-action-title">个人设置</div>
+                    <div class="dashboard-action-desc">头像背景昵称等</div>
+                </div>
+            </div>
+            <div class="dashboard-action-card" onclick="viewMyBox()">
+                <div class="dashboard-action-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                    <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </div>
+                <div class="dashboard-action-text">
+                    <div class="dashboard-action-title">预览提问箱</div>
+                    <div class="dashboard-action-desc">查看公开页面效果</div>
+                </div>
+            </div>
+            <div class="dashboard-action-card" id="adminEntry" style="display:none;" onclick="navigate('admin')">
+                <div class="dashboard-action-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div class="dashboard-action-text">
+                    <div class="dashboard-action-title">管理员后台</div>
+                    <div class="dashboard-action-desc">全局用户管理</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-messages">
+            <div class="section-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                全部提问
+            </div>
+            <div id="dashMessages">
+                <div class="loading"><div class="spinner"></div>加载中...</div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="bottom-nav-item active" onclick="navigate('dashboard')">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                <span>首页</span>
+            </div>
+            <div class="bottom-nav-item" onclick="viewMyBox()">
+                <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span>提问箱</span>
+            </div>
+            <div class="bottom-nav-item" onclick="navigate('settings')">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span>设置</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 设置页 ========== -->
+    <div class="page settings-page" id="page-settings">
+        <div class="topbar">
+            <div class="topbar-title">
+                <div class="icon-btn" onclick="navigate('dashboard')" style="margin-right:8px;">
+                    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                </div>
+                个人设置
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <div class="settings-section-title">个人资料</div>
+            <div class="settings-item" onclick="showEditModal('nickname')">
+                <div class="settings-item-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <div class="settings-item-content">
+                    <div class="settings-item-label">昵称</div>
+                    <div class="settings-item-value" id="setNickname">-</div>
+                </div>
+                <div class="settings-item-arrow">›</div>
+            </div>
+            <div class="settings-item" onclick="showEditModal('bio')">
+                <div class="settings-item-icon" style="background: linear-gradient(135deg, #8b5cf6, #ec4899);">
+                    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </div>
+                <div class="settings-item-content">
+                    <div class="settings-item-label">个人简介</div>
+                    <div class="settings-item-value" id="setBio">-</div>
+                </div>
+                <div class="settings-item-arrow">›</div>
+            </div>
+            <div class="settings-item" onclick="showAvatarModal()">
+                <div class="settings-item-icon" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                </div>
+                <div class="settings-item-content">
+                    <div class="settings-item-label">头像</div>
+                    <div class="settings-item-value">点击上传自定义头像</div>
+                </div>
+                <div class="settings-preview" id="setAvatarPreview">👤</div>
+            </div>
+            <div class="settings-item" onclick="showBgModal()">
+                <div class="settings-item-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                </div>
+                <div class="settings-item-content">
+                    <div class="settings-item-label">背景图</div>
+                    <div class="settings-item-value">点击上传提问箱背景</div>
+                </div>
+                <div class="settings-bg-preview" id="setBgPreview"></div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <div class="settings-section-title">提问箱设置</div>
+            <div class="settings-item">
+                <div class="settings-item-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                    <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </div>
+                <div class="settings-item-content">
+                    <div class="settings-item-label">开启提问</div>
+                    <div class="settings-item-value">关闭后别人无法向你提问</div>
+                </div>
+                <div class="switch active" id="switchEnabled" onclick="toggleEnabled()"></div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <div class="settings-section-title">账号</div>
+            <div class="settings-item" onclick="showShareModal()">
+                <div class="settings-item-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                    <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                </div>
+                <div class="settings-item-content">
+                    <div class="settings-item-label">我的提问箱链接</div>
+                    <div class="settings-item-value" id="setLink">-</div>
+                </div>
+                <div class="settings-item-arrow">›</div>
+            </div>
+            <div class="settings-item" onclick="logout()">
+                <div class="settings-item-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                    <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </div>
+                <div class="settings-item-content">
+                    <div class="settings-item-label" style="color: var(--danger);">退出登录</div>
+                </div>
+                <div class="settings-item-arrow">›</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 管理员页 ========== -->
+    <div class="page settings-page" id="page-admin">
+        <div class="topbar">
+            <div class="topbar-title">
+                <div class="icon-btn" onclick="navigate('dashboard')" style="margin-right:8px;">
+                    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                </div>
+                管理员后台
+            </div>
+        </div>
+
+        <div class="dashboard-stats" style="margin-top: 16px;">
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-value" id="adminUserCount">0</div>
+                <div class="dashboard-stat-label">总用户</div>
+            </div>
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-value" id="adminMsgCount">0</div>
+                <div class="dashboard-stat-label">总提问</div>
+            </div>
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-value" id="adminReplyCount">0</div>
+                <div class="dashboard-stat-label">总回复</div>
+            </div>
+        </div>
+
+        <div class="admin-users-list" style="margin-top: 20px;">
+            <div class="section-title">全部用户</div>
+            <div id="adminUsers">
+                <div class="loading"><div class="spinner"></div>加载中...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 分享弹窗 ========== -->
+    <div class="modal-mask" id="shareModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">分享提问箱</div>
+                <div class="modal-close" onclick="closeModal('shareModal')">×</div>
+            </div>
+            <div class="modal-body">
+                <div class="share-link-box">
+                    <div class="share-link-text" id="shareLink">-</div>
+                    <button class="share-copy-btn" onclick="copyLink()">复制</button>
+                </div>
+                <div class="share-methods">
+                    <div class="share-method" onclick="shareTo('wechat')">
+                        <div class="share-method-icon" style="background: #07c160;">💬</div>
+                        <div class="share-method-label">微信</div>
+                    </div>
+                    <div class="share-method" onclick="shareTo('qq')">
+                        <div class="share-method-icon" style="background: #12b7f5;">🐧</div>
+                        <div class="share-method-label">QQ</div>
+                    </div>
+                    <div class="share-method" onclick="shareTo('weibo')">
+                        <div class="share-method-icon" style="background: #e6162d;">📢</div>
+                        <div class="share-method-label">微博</div>
+                    </div>
+                    <div class="share-method" onclick="shareTo('more')">
+                        <div class="share-method-icon" style="background: #64748b;">⋯</div>
+                        <div class="share-method-label">更多</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 编辑资料弹窗 ========== -->
+    <div class="modal-mask" id="editModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title" id="editModalTitle">编辑</div>
+                <div class="modal-close" onclick="closeModal('editModal')">×</div>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <textarea class="form-input" id="editInput" style="min-height: 100px; resize: vertical; padding: 14px;"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('editModal')">取消</button>
+                <button class="btn btn-primary" onclick="saveEdit()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 头像上传弹窗 ========== -->
+    <div class="modal-mask" id="avatarModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">设置头像</div>
+                <div class="modal-close" onclick="closeModal('avatarModal')">×</div>
+            </div>
+            <div class="modal-body">
+                <div id="avatarPreviewWrap" style="display:none; margin-bottom:16px;">
+                    <img id="avatarPreview" class="upload-preview" alt="头像预览">
+                </div>
+                <div class="upload-area" onclick="document.getElementById('avatarInput').click()">
+                    <div class="upload-area-icon">📷</div>
+                    <div class="upload-area-text">点击上传头像</div>
+                    <div class="upload-area-hint">支持 JPG、PNG，建议正方形</div>
+                </div>
+                <input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="handleAvatarUpload(event)">
+                <div class="form-group" style="margin-top:16px;">
+                    <label class="form-label">或输入图片链接</label>
+                    <input type="text" class="form-input" id="avatarUrlInput" placeholder="https://...">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('avatarModal')">取消</button>
+                <button class="btn btn-primary" onclick="saveAvatar()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 背景上传弹窗 ========== -->
+    <div class="modal-mask" id="bgModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">设置背景图</div>
+                <div class="modal-close" onclick="closeModal('bgModal')">×</div>
+            </div>
+            <div class="modal-body">
+                <div id="bgPreviewWrap" style="display:none; margin-bottom:16px;">
+                    <img id="bgPreview" class="upload-preview" alt="背景预览">
+                </div>
+                <div class="upload-area" onclick="document.getElementById('bgInput').click()">
+                    <div class="upload-area-icon">🖼️</div>
+                    <div class="upload-area-text">点击上传背景图</div>
+                    <div class="upload-area-hint">支持 JPG、PNG，建议横版</div>
+                </div>
+                <input type="file" id="bgInput" accept="image/*" style="display:none;" onchange="handleBgUpload(event)">
+                <div class="form-group" style="margin-top:16px;">
+                    <label class="form-label">或输入图片链接</label>
+                    <input type="text" class="form-input" id="bgUrlInput" placeholder="https://...">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('bgModal')">取消</button>
+                <button class="btn btn-primary" onclick="saveBg()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 隐藏的文件输入 -->
+    <input type="file" id="hiddenFileInput" style="display:none;">
+
+    <script>
+        // ==================== 配置 ====================
+        const CONFIG = {
+            BIN_ID: '6a9d13b2f5f4af5e29706f72',
+            ACCESS_KEY: '$2a$10$H6RNZ8yRl2VzOoJvBsDCT.j1JiSt7uinVUZ.tmlwgen78ATCB7lZq',
+            API_BASE: 'https://api.jsonbin.io/v3/b',
+            // 预设管理员账号（邮箱/手机号）
+            ADMIN_ACCOUNTS: ['admin@box.com', 'admin']
+        };
+
+        // 全局状态
+        let currentUser = null;
+        let appData = { users: [], messages: [] };
+        let currentBoxUserId = null;
+        let editType = null;
+        let tempAvatar = null;
+        let tempBg = null;
+
+        // ==================== 工具函数 ====================
+        function showToast(msg, duration = 2000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), duration);
+        }
+
+        function formatTime(timeStr) {
+            if (!timeStr) return '';
+            const time = new Date(timeStr);
+            const now = new Date();
+            const diff = now - time;
+            if (diff < 60000) return '刚刚';
+            if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
+            if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
+            if (diff < 604800000) return Math.floor(diff / 86400000) + '天前';
+            return time.toLocaleDateString('zh-CN');
+        }
+
+        function generateId(prefix) {
+            return prefix + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+        }
+
+        function isValidEmail(str) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str);
+        }
+
+        function isValidPhone(str) {
+            return /^1[3-9]\d{9}$/.test(str);
+        }
+
+        // ==================== 数据操作 ====================
+        async function loadData() {
+            try {
+                const res = await fetch(`${CONFIG.API_BASE}/${CONFIG.BIN_ID}/latest`, {
+                    headers: { 'X-Access-Key': CONFIG.ACCESS_KEY }
+                });
+                const data = await res.json();
+                const record = data.record || {};
+                appData = record.anonymousBox || { users: [], messages: [] };
+                if (!appData.users) appData.users = [];
+                if (!appData.messages) appData.messages = [];
+                return appData;
+            } catch (e) {
+                console.error('加载数据失败', e);
+                return appData;
+            }
+        }
+
+        async function saveData() {
+            try {
+                const res = await fetch(`${CONFIG.API_BASE}/${CONFIG.BIN_ID}/latest`, {
+                    headers: { 'X-Access-Key': CONFIG.ACCESS_KEY }
+                });
+                const fullData = await res.json();
+                const record = fullData.record || {};
+                record.anonymousBox = appData;
+
+                await fetch(`${CONFIG.API_BASE}/${CONFIG.BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Access-Key': CONFIG.ACCESS_KEY
+                    },
+                    body: JSON.stringify(record)
+                });
+                return true;
+            } catch (e) {
+                console.error('保存数据失败', e);
+                showToast('网络错误，请稍后重试');
+                return false;
+            }
+        }
+
+        // ==================== 路由 ====================
+        function navigate(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + page).classList.add('active');
+            window.scrollTo(0, 0);
+
+            if (page === 'dashboard') loadDashboard();
+            if (page === 'settings') loadSettings();
+            if (page === 'admin') loadAdmin();
+        }
+
+        function parseRoute() {
+            const hash = window.location.hash.slice(1);
+            if (hash.startsWith('box/')) {
+                const userId = hash.slice(4);
+                return { page: 'box', userId };
+            }
+            return { page: 'auth', userId: null };
+        }
+
+        function initRoute() {
+            const route = parseRoute();
+            if (route.page === 'box') {
+                currentBoxUserId = route.userId;
+                loadBox();
+                navigate('box');
+            } else {
+                // 检查登录状态
+                const saved = localStorage.getItem('ab_current_user');
+                if (saved) {
+                    try {
+                        const user = JSON.parse(saved);
+                        const exists = appData.users.find(u => u.id === user.id);
+                        if (exists) {
+                            currentUser = exists;
+                            navigate('dashboard');
+                            return;
+                        }
+                    } catch (e) {}
+                }
+                navigate('auth');
+            }
+        }
+
+        // ==================== 登录注册 ====================
+        function switchAuthTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.auth-tab[data-tab="${tab}"]`).classList.add('active');
+            document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+            document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+        }
+
+        async function doLogin() {
+            const account = document.getElementById('loginAccount').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!account || !password) {
+                showToast('请输入账号和密码');
+                return;
+            }
+
+            await loadData();
+            const user = appData.users.find(u =>
+                (u.email === account || u.phone === account || u.account === account) && u.password === password
+            );
+
+            if (!user) {
+                showToast('账号或密码错误');
+                return;
+            }
+
+            currentUser = user;
+            localStorage.setItem('ab_current_user', JSON.stringify(user));
+            showToast('登录成功');
+            navigate('dashboard');
+        }
+
+        async function doRegister() {
+            const nickname = document.getElementById('regNickname').value.trim();
+            const account = document.getElementById('regAccount').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const password2 = document.getElementById('regPassword2').value;
+
+            if (!nickname) { showToast('请输入昵称'); return; }
+            if (!account) { showToast('请输入邮箱或手机号'); return; }
+            if (password.length < 6) { showToast('密码至少6位'); return; }
+            if (password !== password2) { showToast('两次密码不一致'); return; }
+
+            await loadData();
+            if (appData.users.find(u => u.email === account || u.phone === account || u.account === account)) {
+                showToast('该账号已注册');
+                return;
+            }
+
+            const isAdmin = CONFIG.ADMIN_ACCOUNTS.includes(account);
+            const newUser = {
+                id: generateId('user'),
+                account: account,
+                email: isValidEmail(account) ? account : '',
+                phone: isValidPhone(account) ? account : '',
+                password: password,
+                nickname: nickname,
+                avatar: '',
+                bio: '这个人很懒，什么都没写~',
+                background: '',
+                boxEnabled: true,
+                isAdmin: isAdmin,
+                createTime: new Date().toISOString()
+            };
+
+            appData.users.push(newUser);
+            await saveData();
+
+            currentUser = newUser;
+            localStorage.setItem('ab_current_user', JSON.stringify(newUser));
+            showToast(isAdmin ? '注册成功，管理员账号已激活' : '注册成功');
+            navigate('dashboard');
+        }
+
+        function logout() {
+            if (!confirm('确定要退出登录吗？')) return;
+            currentUser = null;
+            localStorage.removeItem('ab_current_user');
+            window.location.hash = '';
+            navigate('auth');
+        }
+
+        // ==================== 提问箱页 ====================
+        async function loadBox() {
+            await loadData();
+            const user = appData.users.find(u => u.id === currentBoxUserId);
+
+            if (!user) {
+                document.getElementById('boxName').textContent = '用户不存在';
+                document.getElementById('boxBio').textContent = '该提问箱不存在或已被删除';
+                document.getElementById('askSection').style.display = 'none';
+                document.getElementById('publicMessages').innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔍</div><div class="empty-state-text">提问箱不存在</div></div>';
+                return;
+            }
+
+            // 设置用户信息
+            document.getElementById('boxName').textContent = user.nickname;
+            document.getElementById('boxBio').textContent = user.bio || '欢迎来到我的匿名提问箱';
+
+            // 头像
+            const avatarEl = document.getElementById('boxAvatar');
+            if (user.avatar) {
+                avatarEl.innerHTML = `<img src="${user.avatar}" alt="头像">`;
+            } else {
+                avatarEl.textContent = user.nickname.charAt(0).toUpperCase();
+            }
+
+            // 背景
+            const heroEl = document.getElementById('boxHero');
+            if (user.background) {
+                heroEl.style.backgroundImage = `url(${user.background})`;
+            } else {
+                heroEl.style.backgroundImage = '';
+            }
+
+            // 提问开关
+            if (user.boxEnabled === false) {
+                document.getElementById('askSection').innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔒</div><div class="empty-state-text">提问箱已关闭<br>主人暂时不接受提问</div></div>';
+            }
+
+            // 统计
+            const userMsgs = appData.messages.filter(m => m.userId === currentBoxUserId);
+            document.getElementById('statTotal').textContent = userMsgs.length;
+            document.getElementById('statReplied').textContent = userMsgs.filter(m => m.reply).length;
+            document.getElementById('statPublic').textContent = userMsgs.filter(m => m.isPublic !== false && m.reply).length;
+
+            // 公开留言
+            renderPublicMessages(userMsgs.filter(m => m.isPublic !== false && m.reply));
+        }
+
+        function renderPublicMessages(messages) {
+            const container = document.getElementById('publicMessages');
+            if (messages.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💬</div><div class="empty-state-text">还没有公开的问答<br>快来提出第一个问题吧</div></div>';
+                return;
+            }
+
+            container.innerHTML = messages.slice().reverse().map(m => `
+                <div class="message-card">
+                    <div class="message-header">
+                        <div class="message-author">
+                            <div class="message-author-avatar">匿</div>
+                            匿名用户
+                        </div>
+                        <div class="message-time">${formatTime(m.createTime)}</div>
+                    </div>
+                    <div class="message-content">${escapeHtml(m.content)}</div>
+                    ${m.reply ? `
+                    <div class="message-reply">
+                        <div class="message-reply-label">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            主人回复
+                        </div>
+                        <div class="message-reply-content">${escapeHtml(m.reply)}</div>
+                    </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        async function submitMessage() {
+            const input = document.getElementById('askInput');
+            const content = input.value.trim();
+
+            if (!content) {
+                showToast('请输入问题内容');
+                return;
+            }
+            if (content.length > 500) {
+                showToast('问题不能超过500字');
+                return;
+            }
+
+            const btn = document.getElementById('askSubmit');
+            btn.disabled = true;
+            btn.textContent = '发送中...';
+
+            await loadData();
+            const newMsg = {
+                id: generateId('msg'),
+                userId: currentBoxUserId,
+                content: content,
+                reply: '',
+                isPublic: true,
+                createTime: new Date().toISOString(),
+                replyTime: null
+            };
+
+            appData.messages.push(newMsg);
+            await saveData();
+
+            input.value = '';
+            btn.disabled = false;
+            btn.textContent = '发送';
+            showToast('发送成功，等待主人回复');
+            loadBox();
+        }
+
+        // ==================== 后台页 ====================
+        async function loadDashboard() {
+            if (!currentUser) return;
+
+            await loadData();
+            // 同步最新用户数据
+            currentUser = appData.users.find(u => u.id === currentUser.id) || currentUser;
+
+            document.getElementById('dashName').textContent = currentUser.nickname;
+
+            // 管理员入口
+            document.getElementById('adminEntry').style.display = currentUser.isAdmin ? 'flex' : 'none';
+
+            const userMsgs = appData.messages.filter(m => m.userId === currentUser.id);
+            document.getElementById('dashTotal').textContent = userMsgs.length;
+            document.getElementById('dashUnreplied').textContent = userMsgs.filter(m => !m.reply).length;
+            document.getElementById('dashReplied').textContent = userMsgs.filter(m => m.reply).length;
+
+            renderDashMessages(userMsgs);
+        }
+
+        function renderDashMessages(messages) {
+            const container = document.getElementById('dashMessages');
+            if (messages.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">还没有收到提问<br>去分享你的提问箱链接吧</div></div>';
+                return;
+            }
+
+            container.innerHTML = messages.slice().reverse().map(m => `
+                <div class="message-card" id="msg-${m.id}">
+                    <div class="message-header">
+                        <div class="message-author">
+                            <div class="message-author-avatar">匿</div>
+                            匿名用户
+                        </div>
+                        <div class="message-time">${formatTime(m.createTime)}</div>
+                    </div>
+                    <div class="message-content">${escapeHtml(m.content)}</div>
+                    ${m.reply ? `
+                    <div class="message-reply">
+                        <div class="message-reply-label">已回复 · ${formatTime(m.replyTime)}</div>
+                        <div class="message-reply-content">${escapeHtml(m.reply)}</div>
+                    </div>
+                    ` : `
+                    <div>
+                        <textarea class="message-reply-input" id="reply-${m.id}" placeholder="输入回复内容..." maxlength="500"></textarea>
+                        <div class="message-reply-actions">
+                            <button class="btn-sm btn-primary" onclick="submitReply('${m.id}')">回复</button>
+                            <button class="btn-sm btn-secondary" onclick="togglePublic('${m.id}')">${m.isPublic === false ? '设为公开' : '设为隐藏'}</button>
+                        </div>
+                    </div>
+                    `}
+                    <div class="message-actions">
+                        ${m.reply ? `<div class="message-action" onclick="editReply('${m.id}')"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>编辑回复</div>` : ''}
+                        <div class="message-action danger" onclick="deleteMessage('${m.id}')"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>删除</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function submitReply(msgId) {
+            const input = document.getElementById('reply-' + msgId);
+            const reply = input.value.trim();
+            if (!reply) { showToast('请输入回复内容'); return; }
+
+            await loadData();
+            const msg = appData.messages.find(m => m.id === msgId);
+            if (msg) {
+                msg.reply = reply;
+                msg.replyTime = new Date().toISOString();
+                msg.isPublic = true;
+                await saveData();
+                showToast('回复成功');
+                loadDashboard();
+            }
+        }
+
+        function editReply(msgId) {
+            const msg = appData.messages.find(m => m.id === msgId);
+            if (!msg) return;
+            const card = document.getElementById('msg-' + msgId);
+            const replyDiv = card.querySelector('.message-reply');
+            replyDiv.innerHTML = `
+                <textarea class="message-reply-input" id="editreply-${msgId}" maxlength="500">${escapeHtml(msg.reply)}</textarea>
+                <div class="message-reply-actions">
+                    <button class="btn-sm btn-primary" onclick="saveEditReply('${msgId}')">保存</button>
+                    <button class="btn-sm btn-secondary" onclick="loadDashboard()">取消</button>
+                </div>
+            `;
+        }
+
+        async function saveEditReply(msgId) {
+            const input = document.getElementById('editreply-' + msgId);
+            const reply = input.value.trim();
+            if (!reply) { showToast('回复不能为空'); return; }
+
+            await loadData();
+            const msg = appData.messages.find(m => m.id === msgId);
+            if (msg) {
+                msg.reply = reply;
+                msg.replyTime = new Date().toISOString();
+                await saveData();
+                showToast('修改成功');
+                loadDashboard();
+            }
+        }
+
+        async function togglePublic(msgId) {
+            await loadData();
+            const msg = appData.messages.find(m => m.id === msgId);
+            if (msg) {
+                msg.isPublic = msg.isPublic === false ? true : false;
+                await saveData();
+                showToast(msg.isPublic ? '已设为公开' : '已设为隐藏');
+                loadDashboard();
+            }
+        }
+
+        async function deleteMessage(msgId) {
+            if (!confirm('确定要删除这条提问吗？')) return;
+            await loadData();
+            appData.messages = appData.messages.filter(m => m.id !== msgId);
+            await saveData();
+            showToast('已删除');
+            loadDashboard();
+        }
+
+        function viewMyBox() {
+            if (!currentUser) return;
+            window.location.hash = 'box/' + currentUser.id;
+            currentBoxUserId = currentUser.id;
+            loadBox();
+            navigate('box');
+        }
+
+        // ==================== 设置页 ====================
+        function loadSettings() {
+            if (!currentUser) return;
+            document.getElementById('setNickname').textContent = currentUser.nickname;
+            document.getElementById('setBio').textContent = currentUser.bio || '-';
+            document.getElementById('setLink').textContent = window.location.origin + window.location.pathname + '#box/' + currentUser.id;
+
+            // 头像预览
+            const avatarPreview = document.getElementById('setAvatarPreview');
+            if (currentUser.avatar) {
+                avatarPreview.innerHTML = `<img src="${currentUser.avatar}" style="width:100%;height:100%;object-fit:cover;">`;
+            } else {
+                avatarPreview.textContent = currentUser.nickname.charAt(0).toUpperCase();
+            }
+
+            // 背景预览
+            const bgPreview = document.getElementById('setBgPreview');
+            if (currentUser.background) {
+                bgPreview.style.backgroundImage = `url(${currentUser.background})`;
+            }
+
+            // 开关
+            const sw = document.getElementById('switchEnabled');
+            if (currentUser.boxEnabled === false) {
+                sw.classList.remove('active');
+            } else {
+                sw.classList.add('active');
+            }
+        }
+
+        async function toggleEnabled() {
+            await loadData();
+            currentUser = appData.users.find(u => u.id === currentUser.id);
+            currentUser.boxEnabled = currentUser.boxEnabled === false ? true : false;
+            await saveData();
+            loadSettings();
+            showToast(currentUser.boxEnabled ? '提问箱已开启' : '提问箱已关闭');
+        }
+
+        // 编辑资料
+        function showEditModal(type) {
+            editType = type;
+            const title = type === 'nickname' ? '修改昵称' : '修改简介';
+            const value = type === 'nickname' ? currentUser.nickname : currentUser.bio;
+            document.getElementById('editModalTitle').textContent = title;
+            document.getElementById('editInput').value = value;
+            document.getElementById('editInput').placeholder = type === 'nickname' ? '请输入新昵称' : '介绍一下自己吧';
+            document.getElementById('editModal').classList.add('show');
+        }
+
+        async function saveEdit() {
+            const value = document.getElementById('editInput').value.trim();
+            if (!value) { showToast('内容不能为空'); return; }
+
+            await loadData();
+            currentUser = appData.users.find(u => u.id === currentUser.id);
+            if (editType === 'nickname') {
+                currentUser.nickname = value;
+            } else {
+                currentUser.bio = value;
+            }
+            await saveData();
+            closeModal('editModal');
+            showToast('保存成功');
+            loadSettings();
+        }
+
+        // 头像上传
+        function showAvatarModal() {
+            tempAvatar = null;
+            document.getElementById('avatarPreviewWrap').style.display = 'none';
+            document.getElementById('avatarUrlInput').value = '';
+            document.getElementById('avatarModal').classList.add('show');
+        }
+
+        function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('图片不能超过2MB');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                tempAvatar = e.target.result;
+                document.getElementById('avatarPreview').src = tempAvatar;
+                document.getElementById('avatarPreviewWrap').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function saveAvatar() {
+            const urlInput = document.getElementById('avatarUrlInput').value.trim();
+            const avatar = tempAvatar || urlInput;
+
+            if (!avatar) { showToast('请上传图片或输入链接'); return; }
+
+            await loadData();
+            currentUser = appData.users.find(u => u.id === currentUser.id);
+            currentUser.avatar = avatar;
+            await saveData();
+            closeModal('avatarModal');
+            showToast('头像保存成功');
+            loadSettings();
+        }
+
+        // 背景上传
+        function showBgModal() {
+            tempBg = null;
+            document.getElementById('bgPreviewWrap').style.display = 'none';
+            document.getElementById('bgUrlInput').value = '';
+            document.getElementById('bgModal').classList.add('show');
+        }
+
+        function handleBgUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (file.size > 3 * 1024 * 1024) {
+                showToast('图片不能超过3MB');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                tempBg = e.target.result;
+                document.getElementById('bgPreview').src = tempBg;
+                document.getElementById('bgPreviewWrap').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function saveBg() {
+            const urlInput = document.getElementById('bgUrlInput').value.trim();
+            const bg = tempBg || urlInput;
+
+            if (!bg) { showToast('请上传图片或输入链接'); return; }
+
+            await loadData();
+            currentUser = appData.users.find(u => u.id === currentUser.id);
+            currentUser.background = bg;
+            await saveData();
+            closeModal('bgModal');
+            showToast('背景保存成功');
+            loadSettings();
+        }
+
+        // ==================== 管理员页 ====================
+        async function loadAdmin() {
+            if (!currentUser || !currentUser.isAdmin) {
+                showToast('无管理员权限');
+                navigate('dashboard');
+                return;
+            }
+
+            await loadData();
+            document.getElementById('adminUserCount').textContent = appData.users.length;
+            document.getElementById('adminMsgCount').textContent = appData.messages.length;
+            document.getElementById('adminReplyCount').textContent = appData.messages.filter(m => m.reply).length;
+
+            const container = document.getElementById('adminUsers');
+            container.innerHTML = appData.users.map(u => {
+                const userMsgs = appData.messages.filter(m => m.userId === u.id);
+                return `
+                <div class="admin-user-card">
+                    <div class="admin-user-avatar">${u.avatar ? `<img src="${u.avatar}">` : u.nickname.charAt(0).toUpperCase()}</div>
+                    <div class="admin-user-info">
+                        <div class="admin-user-name">
+                            ${escapeHtml(u.nickname)}
+                            ${u.isAdmin ? '<span class="admin-badge">管理员</span>' : ''}
+                        </div>
+                        <div class="admin-user-email">${u.account || u.email || u.phone}</div>
+                        <div class="admin-user-stats">${userMsgs.length}条提问 · ${userMsgs.filter(m => m.reply).length}条回复</div>
+                    </div>
+                    <div class="admin-user-actions">
+                        ${!u.isAdmin ? `<button class="btn-sm btn-danger" onclick="adminDeleteUser('${u.id}')">删除</button>` : ''}
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        async function adminDeleteUser(userId) {
+            if (!confirm('确定要删除该用户及其所有提问吗？此操作不可恢复')) return;
+            await loadData();
+            appData.users = appData.users.filter(u => u.id !== userId);
+            appData.messages = appData.messages.filter(m => m.userId !== userId);
+            await saveData();
+            showToast('用户已删除');
+            loadAdmin();
+        }
+
+        // ==================== 分享 ====================
+        function showShareModal() {
+            const userId = currentBoxUserId || (currentUser ? currentUser.id : null);
+            if (!userId) return;
+            const link = window.location.origin + window.location.pathname + '#box/' + userId;
+            document.getElementById('shareLink').textContent = link;
+            document.getElementById('shareModal').classList.add('show');
+        }
+
+        function copyLink() {
+            const link = document.getElementById('shareLink').textContent;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(link).then(() => {
+                    showToast('链接已复制');
+                }).catch(() => {
+                    fallbackCopy(link);
+                });
+            } else {
+                fallbackCopy(link);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast('链接已复制');
+            } catch (e) {
+                showToast('复制失败，请手动复制');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function shareTo(platform) {
+            const link = document.getElementById('shareLink').textContent;
+            const user = currentBoxUserId ? appData.users.find(u => u.id === currentBoxUserId) : currentUser;
+            const title = user ? `${user.nickname}的匿名提问箱` : '匿名提问箱';
+            const desc = '快来向我匿名提问吧';
+
+            if (platform === 'wechat') {
+                copyLink();
+                showToast('链接已复制，打开微信粘贴分享');
+            } else if (platform === 'qq') {
+                copyLink();
+                showToast('链接已复制，打开QQ粘贴分享');
+            } else if (platform === 'weibo') {
+                window.open(`https://service.weibo.com/share/share.php?url=${encodeURIComponent(link)}&title=${encodeURIComponent(title + ' - ' + desc)}`, '_blank');
+            } else {
+                if (navigator.share) {
+                    navigator.share({ title: title, text: desc, url: link }).catch(() => {});
+                } else {
+                    copyLink();
+                }
+            }
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        // 点击遮罩关闭弹窗
+        document.querySelectorAll('.modal-mask').forEach(mask => {
+            mask.addEventListener('click', (e) => {
+                if (e.target === mask) mask.classList.remove('show');
+            });
+        });
+
+        // hash变化监听
+        window.addEventListener('hashchange', initRoute);
+
+        // ==================== 初始化 ====================
+        async function init() {
+            await loadData();
+            initRoute();
+        }
+
+        init();
+    </script>
+</body>
+</html>
