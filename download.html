@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>匿名提问箱 - APP下载</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #ffd1dc 0%, #e0c3fc 50%, #c2e9fb 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        .sakura {
+            position: fixed;
+            top: -10px;
+            color: #ffb7c5;
+            font-size: 14px;
+            animation: fall linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(360deg); }
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px 32px;
+            max-width: 380px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(255, 105, 180, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+        .icon {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, #ff69b4, #9b59b6);
+            border-radius: 20px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            box-shadow: 0 4px 16px rgba(255, 105, 180, 0.3);
+        }
+        h1 {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .subtitle {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 28px;
+        }
+        .info {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 13px;
+            color: #555;
+        }
+        .info-item span:first-child { color: #999; }
+        .download-btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #ff69b4, #9b59b6);
+            color: white;
+            text-decoration: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 16px rgba(255, 105, 180, 0.3);
+            margin-bottom: 12px;
+        }
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
+        }
+        .download-btn:active { transform: translateY(0); }
+        .web-link {
+            font-size: 13px;
+            color: #ff69b4;
+            text-decoration: none;
+        }
+        .web-link:hover { text-decoration: underline; }
+        .tips {
+            margin-top: 20px;
+            padding: 12px;
+            background: rgba(255, 105, 180, 0.1);
+            border-radius: 10px;
+            font-size: 12px;
+            color: #888;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon">💌</div>
+        <h1>匿名提问箱</h1>
+        <p class="subtitle">把心里话，悄悄说给TA听</p>
+        
+        <div class="info">
+            <div class="info-item"><span>版本</span><span>1.0.0</span></div>
+            <div class="info-item"><span>大小</span><span>17 KB</span></div>
+            <div class="info-item"><span>系统</span><span>Android 5.0+</span></div>
+            <div class="info-item"><span>类型</span><span>免费 / 无广告</span></div>
+        </div>
+        
+        <a href="anonymous-box.apk" class="download-btn" download>下载 APK 安装包</a>
+        <a href="./" class="web-link">或使用网页版 →</a>
+        
+        <div class="tips">
+            安装提示：下载后点击APK文件，如提示"未知来源"，请在设置中允许安装未知来源应用。
+        </div>
+    </div>
+
+    <script>
+        // 樱花飘落动画
+        const sakuraChars = ['✿', '❀', '✾', '❁'];
+        for (let i = 0; i < 15; i++) {
+            const sakura = document.createElement('div');
+            sakura.className = 'sakura';
+            sakura.textContent = sakuraChars[Math.floor(Math.random() * sakuraChars.length)];
+            sakura.style.left = Math.random() * 100 + 'vw';
+            sakura.style.animationDuration = (Math.random() * 10 + 8) + 's';
+            sakura.style.animationDelay = Math.random() * 10 + 's';
+            sakura.style.opacity = Math.random() * 0.5 + 0.3;
+            document.body.appendChild(sakura);
+        }
+    </script>
+</body>
+</html>
