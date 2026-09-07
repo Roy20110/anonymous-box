@@ -44,13 +44,15 @@
         /* ========== 登录注册页 ========== */
         .auth-page {
             min-height: 100vh;
-            display: flex;
             align-items: center;
             justify-content: center;
             padding: 24px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             position: relative;
             overflow: hidden;
+        }
+        .auth-page.active {
+            display: flex;
         }
         .auth-page::before {
             content: '';
